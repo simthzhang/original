@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#simth
 single_thread=1
 four_thread=1
 eight_thread=1
