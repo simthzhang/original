@@ -14,7 +14,6 @@ source /root/openrc
 function_delete_floatingip()
 {
 function_listrally_instance
-#sleep 2
 mysql << EOF
         select sleep(2);
         use neutron;
