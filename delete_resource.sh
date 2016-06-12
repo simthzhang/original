@@ -31,12 +31,12 @@ EOF
 	# if floating ip belongs to rally instances, recycle
         cat /tmp/$date_file.instancerally | while read myline_instance
 	do
-	echo $myline_floatingip
+#	echo $myline_floatingip
 	floating_ipdelete=`echo $myline_floatingip|awk '{print $2}'`
 	floating_id=`echo $myline_floatingip|awk '{print $1}'`
 	deassociate_instance=`echo $myline_instance|awk '{print $2}'`
-	echo instance is: $deassociate_instance
-	echo floatingip: $floating_ipdelete
+#	echo instance is: $deassociate_instance
+#	echo floatingip: $floating_ipdelete
 	echo `nova show $deassociate_instance`|grep $floating_ipdelete
 	if [ "$?" -eq 0 ]
 	then
@@ -95,7 +95,7 @@ EOF
                 cat /tmp/$date_file.instance1 | while read myline
                 do
                 echo $myline|grep rally >> /tmp/$date_file.instancerally
-	        echo ====is: $myline|grep rally  
+	        echo rally instnace is: $myline|grep rally  
 		done
 }
 
