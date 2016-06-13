@@ -9,16 +9,55 @@ rm -rf *.instance
 rm -rf *.routerdb
 rm -rf *.log
 source /root/openrc
+function_get_resourcefrommysql()
+{
+mysql << EOF
+        select sleep(2);
+        use neutron;
+        select id,floating_ip_address,status from floatingips into outfile '/tmp/$date_file.floatingip';
+        select sleep(2);
+        select * from routers where name not like "router04" into outfile '/tmp/$date_file.routerdb';
+        select sleep(2);
+        use nova;
+        select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance1';
+	select sleep(2);
+	select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance';
+	select sleep(2);
+	use glance;
+	select name,id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
+        select sleep(2);
+	use cinder;
+	select display_name,id,attach_status from volumes where deleted not like "1" into outfile '/tmp/$date_file.volume';
+
+
+
+
+
+
+
+
+
+	
+EOF
+
+
+
+
+
+
+}
+
+
 
 
 function_delete_floatingip()
 {
 function_listrally_instance
-mysql << EOF
-        select sleep(2);
-        use neutron;
-        select id,floating_ip_address,status from floatingips into outfile '/tmp/$date_file.floatingip';
-EOF
+#mysql << EOF
+#        select sleep(2);
+#        use neutron;
+#        select id,floating_ip_address,status from floatingips into outfile '/tmp/$date_file.floatingip';
+#EOF
       cat /tmp/$date_file.floatingip |awk '{print $2}'
         cat /tmp/$date_file.floatingip | while read myline_floatingip
  do
@@ -59,11 +98,11 @@ EOF
 #neutron subnet-delete "SubNet"
 function_delete_router()
 {
-mysql << EOF
-        select sleep(2);
-        use neutron;
-        select * from routers where name not like "router04" into outfile '/tmp/$date_file.routerdb';
-EOF
+#mysql << EOF
+#        select sleep(2);
+#        use neutron;
+#        select * from routers where name not like "router04" into outfile '/tmp/$date_file.routerdb';
+#EOF
 	cat /tmp/$date_file.routerdb |awk '{print $2}'
 	cat /tmp/$date_file.routerdb | while read myline
 	do	
@@ -87,11 +126,11 @@ EOF
 
 function_listrally_instance()
 {
-mysql << EOF
-        select sleep(2);
-        use nova;
-        select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance1';
-EOF
+#mysql << EOF
+#        select sleep(2);
+#        use nova;
+#        select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance1';
+#EOF
                 cat /tmp/$date_file.instance1 | while read myline
                 do
                 echo $myline|grep rally >> /tmp/$date_file.instancerally
@@ -103,11 +142,11 @@ EOF
 
 function_delete_instance()
 {
-mysql << EOF
-	select sleep(2);
-	use nova;
-	select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance';
-EOF
+#mysql << EOF
+#        select sleep(2);
+#        use nova;
+#        select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance1';
+#EOF
 		cat /tmp/$date_file.instance | while read myline
 		do
 		echo $myline|grep rally
@@ -122,11 +161,11 @@ EOF
 
 function_delete_image()
 {
-mysql << EOF
-	select sleep(2);
-	use glance;
-	select name,id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
-EOF
+#mysql << EOF
+#	select sleep(2);
+#	use glance;
+#	select name,id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
+#EOF
 	 cat /tmp/$date_file.image | while read myline
          do
          echo $myline|grep rally
@@ -141,11 +180,12 @@ EOF
 #volume datach format nova volume server_id volume_id
 function_delete_volume()
 {
-mysql << EOF
-        select sleep(2);
-        use cinder;
-        select display_name,id,attach_status from volumes where deleted not like "1" into outfile '/tmp/$date_file.volume';
-EOF
+#mysql << EOF
+#        select sleep(2);
+
+#        use cinder;
+#        select display_name,id,attach_status from volumes where deleted not like "1" into outfile '/tmp/$date_file.volume';
+#EOF
 
   cat /tmp/$date_file.volume | while read myline
          do
@@ -187,11 +227,11 @@ EOF
 
 function_delete_projectoruseri()
 {
-mysql << EOF
-        select sleep(2);
-        use ;
-        select id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
-EOF
+#mysql << EOF
+#        select sleep(2);
+#        use ;
+#        select id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
+#EOF
         glance image-delete `cat $date_file.image`
 }
 
