@@ -12,6 +12,7 @@ rm -rf /tmp/*.volume
 rm -rf /tmp/*.log
 source /root/openrc
 
+	#select display_name,id from snapshots where deleted like "0" into outfile '/tmp/$date_file.volumesnapshot';
 function_get_resourcefrommysql()
 {
 	mysql << EOF
@@ -31,6 +32,7 @@ function_get_resourcefrommysql()
 	select sleep(1);
 	use cinder;
 	select display_name,id,attach_status from volumes where deleted not like "1" into outfile '/tmp/$date_file.volume';
+	select id,display_name,status from snapshots where deleted=0 into outfile '/tmp/$date_file.snapshotnotdeleted';
 	use keystone;
 	select id,name from project into outfile '/tmp/$date_file.project';
 EOF
@@ -173,7 +175,7 @@ function_delete_volume()
 	cat /tmp/$date_file.volume | while read myline
 		do
 			echo $myline|grep rally
-				if [ "$?" -eq 0 ]
+			if [ "$?" -eq 0 ]
 					then
 						echo $myline|grep attached
 						if [ "$?" -eq 0 ]
@@ -190,6 +192,24 @@ function_delete_volume()
 
 
 }
+
+
+function_delete_volume_snapshot()
+{	
+	cat /tmp/$date_file.snapshotnotdeleted | while read myline
+	do
+	echo $myline|grep rally
+	if [ "$?" -eq 0 ]
+	then
+mysql << EOF
+        use cinder;
+	update snapshots set deleted=1 where id="`echo $myline|awk '{print $1}'`";
+EOF
+        echo $myline	
+	fi
+	done
+}
+
 
 #function_delete_network()
 #{
@@ -228,6 +248,7 @@ function_get_resourcefrommysql
 #function_delete_router
 #function_delete_image
 #function_delete_volume
+function_delete_volume_snapshot
 #function_delete_floatingip
 #function_listrally_instance
 #function_delete_security
