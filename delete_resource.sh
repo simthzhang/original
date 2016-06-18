@@ -6,7 +6,6 @@
 date_file=`date "+%Y_%m_%d_%H_%M_%S"`
 rm -rf /tmp/simth*
 source /root/openrc
-<<<<<<< HEAD
 	
 	     function_get_resourcefrommysql()
 	     {
@@ -86,83 +85,6 @@ fi
 done
 fi
 done
-=======
-function_get_resourcefrommysql()
-{
-mysql << EOF
-        select sleep(2);
-        use neutron;
-        select id,floating_ip_address,status from floatingips into outfile '/tmp/$date_file.floatingip';
-        select sleep(2);
-        select * from routers where name not like "router04" into outfile '/tmp/$date_file.routerdb';
-        select sleep(2);
-        use nova;
-        select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance1';
-	select sleep(2);
-	select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance';
-	select sleep(2);
-	use glance;
-	select name,id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
-        select sleep(2);
-	use cinder;
-	select display_name,id,attach_status from volumes where deleted not like "1" into outfile '/tmp/$date_file.volume';
-
-
-
-
-
-
-
-
-
-	
-EOF
-
-
-
-
-
-
-}
-
-
-
-
-function_delete_floatingip()
-{
-function_listrally_instance
-#mysql << EOF
-#        select sleep(2);
-#        use neutron;
-#        select id,floating_ip_address,status from floatingips into outfile '/tmp/$date_file.floatingip';
-#EOF
-      cat /tmp/$date_file.floatingip |awk '{print $2}'
-        cat /tmp/$date_file.floatingip | while read myline_floatingip
- do
-	# if floating ip is DOWN state, recycle
-        echo $myline_floatingip|grep DOWN
-        if [ "$?" -eq 0 ]
-        then
-        neutron floatingip-delete `echo $myline_floatingip|awk '{print $1}'`
-        else
-	# if floating ip belongs to rally instances, recycle
-        cat /tmp/$date_file.instancerally | while read myline_instance
-	do
-	echo $myline_floatingip
-	floating_ipdelete=`echo $myline_floatingip|awk '{print $2}'`
-	floating_id=`echo $myline_floatingip|awk '{print $1}'`
-	deassociate_instance=`echo $myline_instance|awk '{print $2}'`
-	echo `nova show $deassociate_instance`|grep $floating_ipdelete
-	if [ "$?" -eq 0 ]
-	then
-	echo $floating_id 
-	neutron floatingip-delete $floating_id
-
-	fi   
-	done
-	fi
- done
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
 }
 
 
@@ -177,7 +99,6 @@ function_listrally_instance
 #neutron subnet-delete "SubNet"
 function_delete_router()
 {
-<<<<<<< HEAD
 	cat /tmp/simth_$date_file.routerdb |awk '{print $2}'
 		cat /tmp/simth_$date_file.routerdb | while read myline
 		do	
@@ -196,69 +117,21 @@ function_delete_router()
 								fi
 								done
 
-=======
-#mysql << EOF
-#        select sleep(2);
-#        use neutron;
-#        select * from routers where name not like "router04" into outfile '/tmp/$date_file.routerdb';
-#EOF
-	cat /tmp/$date_file.routerdb |awk '{print $2}'
-	cat /tmp/$date_file.routerdb | while read myline
-	do	
-	echo $myline|grep rally
-	if [ "$?" -eq 0 ]
-	then
-	router_todelete=`echo $myline|awk '{print $2}'`
-	neutron router-gateway-clear `echo $myline|awk '{print $2}'`
-	neutron router-port-list $router_todelete|awk -F "\"" '{print $4}' >>/tmp/tempinterface.log
-	cat /tmp/tempinterface.log |grep -v "^$" |while read tempinterface
-	do
-	neutron router-interface-delete $router_todelete $tempinterface
-	done
-	rm -rf /tmp/tempinterface.log	
-        neutron router-delete $router_todelete
-	fi
-	done
-	
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
 }
 
 
 function_listrally_instance()
 {
-<<<<<<< HEAD
 	cat /tmp/simth_$date_file.instance1 | while read myline
 		do
 			echo $myline|grep rally >> /tmp/simth_$date_file.instancerally
 				done
-=======
-#mysql << EOF
-#        select sleep(2);
-#        use nova;
-#        select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance1';
-#EOF
-                cat /tmp/$date_file.instance1 | while read myline
-                do
-                echo $myline|grep rally >> /tmp/$date_file.instancerally
-#                echo $myline >> /tmp/$date_file.instancerally
-		#echo "rally instance is: "$myline
-		done
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
 }
 
 
 function_delete_instance()
 {
-<<<<<<< HEAD
 	cat /tmp/simth_$date_file.instance | while read myline
-=======
-#mysql << EOF
-#        select sleep(2);
-#        use nova;
-#        select display_name,uuid from instances where vm_state not like "deleted" into outfile '/tmp/$date_file.instance1';
-#EOF
-		cat /tmp/$date_file.instance | while read myline
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
 		do
 			echo $myline|grep rally
 				if [ "$?" -eq 0 ]
@@ -271,7 +144,6 @@ function_delete_instance()
 
 function_delete_image()
 {
-<<<<<<< HEAD
 	cat /tmp/simth_$date_file.image | while read myline
 		do
 			echo $myline|grep rally
@@ -280,28 +152,12 @@ function_delete_image()
 						glance image-delete `echo $myline|awk '{print $2}'`
 						fi
 						done
-=======
-#mysql << EOF
-#	select sleep(2);
-#	use glance;
-#	select name,id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
-#EOF
-	 cat /tmp/$date_file.image | while read myline
-         do
-         echo $myline|grep rally
-         if [ "$?" -eq 0 ]
-	then
-	glance image-delete `echo $myline|awk '{print $2}'`
-	fi
-	done
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
 }
 
 #volume attached should be deattched then delete
 #volume datach format nova volume server_id volume_id
 function_delete_volume()
 {
-<<<<<<< HEAD
 	cat /tmp/simth_$date_file.volume | while read myline
 		do
 			echo $myline|grep rally
@@ -319,44 +175,10 @@ function_delete_volume()
 								cinder delete `echo $myline|awk '{print $2}'`
 								fi
 								done
-=======
-#mysql << EOF
-#        select sleep(2);
-
-#        use cinder;
-#        select display_name,id,attach_status from volumes where deleted not like "1" into outfile '/tmp/$date_file.volume';
-#EOF
-
-  cat /tmp/$date_file.volume | while read myline
-         do
-         echo $myline|grep rally
-         if [ "$?" -eq 0 ]
-	then
-	echo $myline|grep attached
-		 if [ "$?" -eq 0 ]
-	         then
-		volume_id=`echo $myline|awk '{print $2}'`
-		echo "volume id is:" $volume_id	
-	        server_id=`nova volume-show $volume_id|grep attachments|awk -F "\"" '{print $4}'`
-		echo "server_id is:" $server_id
-		nova volume-detach $server_id $volume_id
-	         fi
-        cinder delete `echo $myline|awk '{print $2}'`
-	 fi
-        done
-	
-
-
-
-
-
-
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
 
 
 }
 
-<<<<<<< HEAD
 
 function_delete_volume_snapshot()
 {	
@@ -395,26 +217,6 @@ function_delete_securitygroups()
 								nova secgroup-delete `echo $myline_securitygroups|awk '{print $2}'`
 								fi  
 								done
-=======
-#function_delete_network()
-#{
-#mysql << EOF
-#        select sleep(2);
-#        use neutron;
-#        select id from networks where name not like "net04" and name not like "net04_ext" into outfile '/tmp/$date_file.network';
-#EOF
-#        neutron net-delete `cat $date_file.network`
-#}
-
-function_delete_projectoruseri()
-{
-#mysql << EOF
-#        select sleep(2);
-#        use ;
-#        select id from images where deleted not like "1" into outfile '/tmp/$date_file.image';
-#EOF
-        glance image-delete `cat $date_file.image`
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
 }
 
 function_delete_network()
@@ -496,7 +298,6 @@ function_get_resourcefrommysql
 #function_delete_volume_snapshot
 #function_delete_floatingip
 #function_listrally_instance
-<<<<<<< HEAD
 #function_delete_securitygroups
 #function_delete_network
 #function_delete_prj_usr_role
@@ -506,236 +307,3 @@ function_get_resourcefrommysql
 #function_delete_prj_user_role user
 function_delete_prj_user_role role
 tar -zcf simth_$date_file.tar.gz /tmp/simth*
-=======
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> 976fb726c485b0f077a333f8baf7f067ead51833
