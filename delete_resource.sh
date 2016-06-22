@@ -164,17 +164,20 @@ function_delete_volume()
 				if [ "$?" -eq 0 ]
 					then
 						echo $myline|grep attached
+						volume_id=`echo $myline|awk '{print $2}'`
 						if [ "$?" -eq 0 ]
 							then
-								volume_id=`echo $myline|awk '{print $2}'`
+#								volume_id=`echo $myline|awk '{print $2}'`
 								echo "volume id is:" $volume_id	
 								server_id=`nova volume-show $volume_id|grep attachments|awk -F "\"" '{print $4}'`
 								echo "server_id is:" $server_id
 								nova volume-detach $server_id $volume_id
-								fi
-								cinder delete `echo $myline|awk '{print $2}'`
-								fi
-								done
+						fi
+						cinder reset-state $volume_id
+						#cinder delete `echo $myline|awk '{print $2}'`
+						cinder delete $volume_id
+		 		fi
+		done
 
 
 }
@@ -294,7 +297,7 @@ function_get_resourcefrommysql
 #function_delete_instance
 #function_delete_router
 #function_delete_image
-#function_delete_volume
+function_delete_volume
 #function_delete_volume_snapshot
 #function_delete_floatingip
 #function_listrally_instance
@@ -305,5 +308,5 @@ function_get_resourcefrommysql
 #function_delete_userrole
 #function_delete_prj_user_role project
 #function_delete_prj_user_role user
-function_delete_prj_user_role role
-tar -zcf simth_$date_file.tar.gz /tmp/simth*
+#function_delete_prj_user_role role
+tar -zcf $date_file.tar.gz /tmp/simth*
