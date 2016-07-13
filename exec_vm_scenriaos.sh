@@ -19,14 +19,24 @@ check_fio()
 				fi
 }
 
-function_dd()
+function_dd_fio()
 {
-	time dd if=/dev/zero of=/test/hello bs=10M count=100 oflag=direct
-	time dd of=/dev/null if=/test/hello bs=10M count=100 iflag=direct
-		fio --filename=/test/hello  --direct=1 --rw=randwrite --bs=4k --size=100M --numjobs=10 --runtime=20 --name=file1 --ioengine=aio --iodepth=512 --group_reporting
-		fio --filename=/test/hello  --direct=1 --rw=randread  --bs=4k --size=100M --numjobs=10 --runtime=20 --name=file1 --ioengine=aio --iodepth=512 --group_reporting
+mkdir –p /test
 
-		rm /test/hello
+rm /test/result.log
+
+date
+
+#urandom 函数会密集调用cpu资源，生存的随机内容写入hello文件，大小100M左右
+time dd if=/dev/urandom of=/test/hello bs=10M count=10 oflag=direct
+echo urandom
+time dd of=/dev/null if=/test/hello bs=10M count=10 iflag=direct
+echo null
+fio --filename=/test/hello  --direct=1 --rw=randwrite --bs=4k --size=10M --numjobs=10 --runtime=20 --name=file1 --ioengine=aio --iodepth=32 --group_reporting
+echo randwrite 4k
+fio --filename=/test/hello  --direct=1 --rw=randread  --bs=4k --size=10M --numjobs=10 --runtime=20 --name=file1 --ioengine=aio --iodepth=32 --group_reporting
+echo randread 4k
+
 }
 
 function_compute()
@@ -78,6 +88,7 @@ echo end_date is: $end_date
 
 cd /tmp
 
-function_check_rally_dir
-function_compute
-function_check_ifprime
+#function_check_rally_dir
+#function_compute
+#function_check_ifprime
+function_dd_fio
