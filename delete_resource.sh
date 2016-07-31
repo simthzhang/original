@@ -297,9 +297,9 @@ function_get_resourcefrommysql
 #function_delete_instance
 #function_delete_router
 #function_delete_image
-function_delete_volume
+#function_delete_volume
 #function_delete_volume_snapshot
-#function_delete_floatingip
+function_delete_floatingip
 #function_listrally_instance
 #function_delete_securitygroups
 #function_delete_network

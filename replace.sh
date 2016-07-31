@@ -1,28 +1,81 @@
 #!/bin/bash
+para_to_replace="concurrency tim define_tenant_id define_tenant_name define_user_id define_user_name define_user_password"
+#   para_to_replace="concurrency tim define_tenant_id"
+	para_tim="100,"
+	para_concurrency=1
+	para_define_tenant_id="\"b9b3695d8c5b4cfc93120233c37c90dc\","
+	para_define_tenant_name="\"scalability\","
+	para_define_user_id="\"f939e9a43d8949a5a768aa0da12179b5\","
+	para_define_user_name="\"scalability\","
+	para_define_user_password="\"123456\""
+    flavor_orginal=m1.tiny
+    flavor_target=large-scale-100-centos_4G
+    test_simth()
+    {
+        for i in $para_to_replace; do
+#            echo $i
+            echo  `eval echo '$'para_"$i"`
+        done
+    }
 
-for diff_env in `find ./ -name *.json`
+
+    delete_serverid()
+    {
+sed -i 's/\"serverid\_kwargs": {//g' *.json
+    }
+
+
+    modify_flavor()
+{
+    rm -rf /tmp/flavor
+    sed -i 's/m1.tiny/large-scale-100-centos_4G/g' *.json
+    sed -i 's/m1.small/large-scale-100-centos_4G/g' *.json
+    sed -i 's/m1.medium/large-scale-100-centos_4G/g' *.json
+
+}
+modify_image()
+{
+    sed -i 's/\*//g' *.json
+    sed -i 's/\^cirros\.uec\$/root_centos/g' *.json
+    sed -i 's//root_centos/g' *.json
+}
+
+modify_parameter()
+{
+
+	for i in $para_to_replace
+		do		
+
+			rm -rf /tmp/tmp.log
+				grep -rn $i ./*.json|awk -F ":" '{print $1" " $2}' >> /tmp/tmp.log
+
+
+#o linenumber is: $linenumber
+cat /tmp/tmp.log|while read singleline
 do
-    sed -i 's/\^cirros\.\*uec\$/root_centos/g' $diff_env
-    sed -i 's/cirros/root_centos/g' $diff_env
-    sed -i 's/cirros\-0\.3\.4\-x86\_64\-disk\.img/CentOS-7-x86_64-logable-root-root.qcow2/g' $diff_env
+linenumber=`echo $singleline|awk '{print $2}'`
+linefile=`echo $singleline|awk '{print $1}'`
+echo  line number is: $linenumber
+echo  line file is: $linefile
+linecontenttoreplace=`sed -n "$linenumber"p  $linefile`
+originalcycle=`echo $linecontenttoreplace|awk '{print $2}'` 
+echo $originalcycle
+target=`eval echo '$'para_"$i"`
+echo target =============$target
+sed -i "s/$originalcycle/$target/g" $linefile
+#sed -i "s/$linecontenttoreplace/"concurrency:" $targenumber/g" $linefile
+#echo singleline $singleline
+done
 done
 
-#create-and-delete-secgroups.json:10:                "times": 20,
-#boot-from-volume-and-delete.json:17:                "times": 20,
-#boot-and-rebuild.json:18:                "times": 20,
-#create-and-delete-keypair.json:6:                "times": 20,
-#create-and-list-secgroups.json:10:                "times": 20,
-#boot-from-volume.json:16:                "times": 20,
-#boot-server-attach-created-volume-and-live-migrate.json:19:                "times": 20,
-#boot-lock-unlock-and-delete.json:15:                "times": 20,
-#boot-and-live-migrate.json:16:                "times": 20,
-#boot-and-migrate.json:15:                "times": 20,
-#boot-bounce-delete.json:22:                "times": 20,
-#boot-server-from-volume-and-live-migrate.json:18:                "times": 20,
-#boot-server-attach-created-volume-and-resize.json:24:                "times": 20,
-#create-and-update-secgroups.json:9:                "times": 20,
-#create-and-list-keypairs.json:6:                "times": 20,
-#boot-snapshot-boot-delete.json:16:                "times": 20,
-#boot-and-show-server.json:16:                "times": 20,
-#boot-from-volume-and-resize.json:24:
+}
 
+
+
+
+
+
+#test_simth
+modify_parameter
+modify_flavor
+modify_image

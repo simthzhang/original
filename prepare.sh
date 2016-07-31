@@ -6,11 +6,9 @@ vm_dir=/tmp/scalability
 
 list_vms()
 {
-#nova list|awk '{if ("test" in $4) print $2}'
-#nova list|awk '{print $0}'
-
 #head with test
-	nova list|awk '{if($4 ~ /^test*/) print $0;}' >> $vm_dir/vms.tmp
+	#nova list|awk '{if($4 ~ /^test*/) print $0;}' >> $vm_dir/vms.tmp
+	nova list|awk '{if($4 ~ /^scalability*/) print $0;}' >> $vm_dir/vms.tmp
 }
 
 vm_groups()
@@ -35,8 +33,7 @@ vm_groups()
 				echo 1
 				fi
 				}
-
-				associate_floatingip()
+associate_floatingip()
 				{
 				./delete_resource.sh
 				rm -rf $vm_dir/serverid_floatingip.log
@@ -114,11 +111,62 @@ else
 						done
 }
 
+file_transfer()
+{
+#network1 7cebf7cd-8152-4151-8d50-19eba405dd90 scalability_vm1-1 15.15.15.54
+cat $vm_dir/serverid_floatingip.log|while read myline
+do
+groupname=`echo $myline|awk '{print $1}'`
+echo $groupname
+floatingip=`echo $myline|awk '{print $4}'`
+echo $floatingip 
+expect <<-END2
+      spawn scp $vm_dir/$groupname.group /home/simth/exec_script.sh /home/simth/timer.conf internal_disbribute.sh root@$floatingip:/home/simth 
+       set timeout 600
+        expect {
+           #first connect, no public key in ~/.ssh/known_hosts
+            "Are you sure you want to continue connecting (yes/no)?" {
+            send "yes\r"
+           expect "password:"
+               send "root\r"
+            }
+            #already has public key in ~/.ssh/known_hosts
+            "password:" {
+                send "root\r"
+            }
+        }
+
+	spawn ssh root@$floatingip
+      expect {
+           #first connect, no public key in ~/.ssh/known_hosts
+            "Are you sure you want to continue connecting (yes/no)?" {
+            send "yes\r"
+           expect "password:"
+               send "root\r"
+            }
+            #already has public key in ~/.ssh/known_hosts
+            "password:" {
+                send "root\r"
+            }
+        }
+	expect "root@*"
+	send "cd /home/simth && hostname && ls -l && ./internal_disbribute.sh\r"
+        expect "*"
+        send "exit\r"
+        expect eof
+END2
+#        expect "timer.sh"
+ #       send "./timer.sh\r"
+
+done
 
 
-source /root/openrc
+
+}
+source openrc
+#source /root/openrc
 list_vms
 vm_groups
 associate_floatingip
-
+file_transfer
 
